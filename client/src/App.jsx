@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import './App.css';
 import { ToastContainer, toast } from 'react-toastify'; 
 import 'react-toastify/dist/ReactToastify.css';
+import axios from 'axios';
 
 function App() {
   const [companies, setCompanies] = useState([]);
@@ -19,13 +20,9 @@ function App() {
 
   const fetchCompanies = async () => {
     try {
-      const response = await fetch('http://127.0.0.1:5000/api/companies');
-      if (!response.ok) {
-        throw new Error(`Error: ${response.status}`);
-      }
-      const jsonData = await response.json();
-      setCompanies(jsonData.companies);
-      setFilteredCompanies(jsonData.companies);
+      const response = await axios.get('http://127.0.0.1:5000/api/companies');
+      setCompanies(response.data.companies);
+      setFilteredCompanies(response.data.companies);
       setIsLoading(false);
     } catch (err) {
       console.error('Error fetching data:', err);
@@ -35,7 +32,6 @@ function App() {
   };
 
   useEffect(() => {
-   
     const filtered = companies.filter(company =>
       company.location.city.toLowerCase().includes(searchInput.toLowerCase()) &&
       (searchInputName === '' || company.name.toLowerCase().includes(searchInputName.toLowerCase())) &&
@@ -46,13 +42,9 @@ function App() {
 
   const searchCompanies = async () => {
     try {
-      const response = await fetch(`http://127.0.0.1:5000/api/companies/search?query=${searchInputName}`);
-      if (!response.ok) {
-        throw new Error(`Error: ${response.status}`);
-      }
-      const jsonData = await response.json();
-      setFilteredCompanies(jsonData.companies);
-      if (jsonData.companies.length === 0) { 
+      const response = await axios.get(`http://127.0.0.1:5000/api/companies/search?query=${searchInputName}`);
+      setFilteredCompanies(response.data.companies);
+      if (response.data.companies.length === 0) { 
         toast.error("No companies found"); 
       }
     } catch (err) {
@@ -75,9 +67,9 @@ function App() {
     });
     setSortCriteria(criteria);
     setFilteredCompanies(sorted);
-    toast.success(`Company shorted on the basis of ${criteria}`); 
+    toast.success(`Company sorted on the basis of ${criteria}`);
   };
-  
+
   return (
     <div className="app-container">
       <h1 className="heading">Company Information</h1>
